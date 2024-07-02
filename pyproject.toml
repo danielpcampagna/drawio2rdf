@@ -1,5 +1,9 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "draw2rdf"
+name = "drawio2rdf"
 version = "0.0.1"
 authors = [
   { name="Daniel Prett Campagna", email="danielprett@gmail.com" },
@@ -13,7 +17,12 @@ classifiers = [
     "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
 ]
+dependencies = [
+    "click == 8.1.7",
+    "n2g == 0.3.3",
+    "rdflib == 7.0.0"
+]
 
 [project.urls]
-Homepage = "https://github.com/pypa/draw2rdf"
-Issues = "https://github.com/pypa/draw2rdf/issues"
+Homepage = "https://github.com/danielpcampagna/drawio2rdf"
+Issues = "https://github.com/danielpcampagna/drawio2rdf/issues"
