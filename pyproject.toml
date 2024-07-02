@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "drawio2rdf"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Daniel Prett Campagna", email="danielprett@gmail.com" },
 ]
@@ -22,6 +22,9 @@ dependencies = [
     "n2g == 0.3.3",
     "rdflib == 7.0.0"
 ]
+
+[project.scripts]
+drawio2rdf = "drawio2rdf:cli"
 
 [project.urls]
 Homepage = "https://github.com/danielpcampagna/drawio2rdf"
