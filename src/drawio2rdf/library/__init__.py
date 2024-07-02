@@ -8,8 +8,8 @@ from xml.etree.ElementTree import Element
 from dataclasses import dataclass, field
 from typing import Literal
 
-from diagrams.helpers import style_as_dict
-from .model.drawio import MxGraphModel, MxCell
+from drawio2rdf.diagrams.helpers import style_as_dict
+from drawio2rdf.library.model.drawio import MxGraphModel, MxCell
 
 
 def decompress(compressed_str: str) -> MxGraphModel:

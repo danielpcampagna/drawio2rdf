@@ -10,8 +10,8 @@ import logging
 
 from rdflib import Graph, Literal, namespace as ns
 
-from library import Library
-from diagrams.base import Diagram
+from drawio2rdf.library import Library
+from drawio2rdf.diagrams.base import Diagram
 
 
 ValidFormat = TLiteral["json-ld", "hext", "n3", "nquads", "nt", "trix", "turtle", "xml"]

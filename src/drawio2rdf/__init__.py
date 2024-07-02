@@ -2,8 +2,8 @@ import logging
 
 import click
 
-from rdf import RDFConstructorFromGraffoo
-from helpers import use_params
+from drawio2rdf.rdf import RDFConstructorFromGraffoo
+from drawio2rdf.helpers import use_params
 
 
 logger = logging.getLogger(__name__)
