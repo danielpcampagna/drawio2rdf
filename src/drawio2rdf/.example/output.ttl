@@ -1,0 +1,302 @@
+@prefix : <http://example.org/SAPOS#> .
+@prefix gdprov: <https://w3id.org/GDPRov#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pPlan: <http://purl.org/net/p-plan#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix tcu: <http://example.org/TrinityCollegeDublin#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:AdminComparedAlicesCities a owl:NamedIndividual,
+        gdprov:DataComparisonActivity ;
+    pPlan:correspondsToStep :DataComparisonStepWhereCorrectionIsNotNeeded ;
+    prov:endedAtTime "2020-05-30T09:04:00"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:03:00"^^xsd:dateTime ;
+    prov:used :CollectedAlicesNewCity,
+        :StoredAlicesCityName ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminSelectedCityNameById ;
+    gdprov:hadDataDiscrepancy true .
+
+:DataCollectionActivity rdfs:subClassOf :Activity .
+
+:DataCollectionStep rdfs:subClassOf :DataStep .
+
+:DataErasureProcess rdfs:subClassOf :Process .
+
+:EndlessDuration a :Duration .
+
+:FixedOccurencesDuration rdfs:subClassOf :Duration .
+
+:NewStoredAlicesAddress a tcu:StudentAddress,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :RectifiedPersonalData ;
+    owl:differentFrom :StoredAlicesAddress ;
+    prov:wasGeneratedBy :AdminRectifiedAlicesAddress .
+
+:NewStoredAlicesNeighborhood a tcu:StudentNeighborhood,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :RectifiedPersonalData ;
+    owl:differentFrom :StoredAlicesNeighborhood ;
+    prov:wasGeneratedBy :AdminRectifiedAlicesNeighborhood .
+
+:NewStoredAlicesZipCode a tcu:StudentZipCode,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :RectifiedPersonalData ;
+    owl:differentFrom :StoredAlicesZipCode ;
+    prov:wasGeneratedBy :AdminRectifiedAlicesZipCode .
+
+:PersonalData rdfs:subClassOf :Data .
+
+:PersonalDataEntity rdfs:subClassOf :Entity .
+
+:TemporalDuration rdfs:subClassOf :Duration .
+
+:UntilEventDuration rdfs:subClassOf :Duration .
+
+:UntilTimeDuration rdfs:subClassOf :Duration .
+
+pPlan:Step a owl:Class .
+
+pPlan:Variable a owl:Class .
+
+prov:Entity a owl:Class .
+
+gdprov:Data a owl:Class .
+
+gdprov:DataErasureProcess a owl:Class .
+
+gdprov:DataStep a owl:Class .
+
+gdprov:Duration a owl:Class .
+
+gdprov:EndlessDuration a owl:NamedIndividual .
+
+gdprov:FixedOccurencesDuration a owl:Class .
+
+gdprov:Process a owl:Class .
+
+gdprov:StorageCondition a owl:Class .
+
+gdprov:TemporalDuration a owl:Class .
+
+gdprov:UntilEventDuration a owl:Class .
+
+gdprov:UntilTimeDuration a owl:Class .
+
+:Admin a owl:NamedIndividual,
+        prov:Agent .
+
+:AdminComparedAlicesAddresses a owl:NamedIndividual,
+        gdprov:DataComparisonActivity ;
+    pPlan:correspondsToStep :DataComparisonStepWhereCorrectionIsNeeded ;
+    prov:endedAtTime "2020-05-30T09:10:00"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:09:00"^^xsd:dateTime ;
+    prov:used :CollectedAlicesNewAddress,
+        :StoredAlicesAddress ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminCollectedDataFromAlicesEmail ;
+    gdprov:hadDataDiscrepancy false .
+
+:AdminComparedAlicesNeighborhoods a owl:NamedIndividual,
+        gdprov:DataComparisonActivity ;
+    pPlan:correspondsToStep :DataComparisonStepWhereCorrectionIsNeeded ;
+    prov:endedAtTime "2020-05-30T09:06:00"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:05:00"^^xsd:dateTime ;
+    prov:used :CollectedAlicesNewNeighborhood,
+        :StoredAlicesNeighborhood ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminCollectedDataFromAlicesEmail ;
+    gdprov:hadDataDiscrepancy false .
+
+:AdminComparedAlicesZipCodes a owl:NamedIndividual,
+        gdprov:DataComparisonActivity ;
+    pPlan:correspondsToStep :DataComparisonStepWhereCorrectionIsNeeded ;
+    prov:endedAtTime "2020-05-30T09:08:00"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:07:00"^^xsd:dateTime ;
+    prov:used :CollectedAlicesNewZipCode,
+        :StoredAlicesZipCode ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminCollectedDataFromAlicesEmail ;
+    gdprov:hadDataDiscrepancy false .
+
+:AliceSendedEmailToSaposAdmin a owl:NamedIndividual,
+        prov:Activity ;
+    prov:endedAtTime "2020-05-29T22:01:00"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-29T22:00:00"^^xsd:dateTime ;
+    prov:used :AlicesNewAddress,
+        :AlicesNewCity,
+        :AlicesNewNeighborhood,
+        :AlicesNewZipCode ;
+    prov:wasAssociatedWith :Alice .
+
+:CollectedAlicesNewAddress a tcu:StudentAddress,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :CollectedPersonalData ;
+    prov:wasDerivedFrom :AlicesNewAddress ;
+    prov:wasGeneratedBy :AdminCollectedDataFromAlicesEmail .
+
+:CollectedAlicesNewCity a tcu:CityName,
+        owl:NamedIndividual,
+        gdprov:PersonalDataEntity ;
+    pPlan:correspondsToVariable :CollectedPersonalData ;
+    prov:wasDerivedFrom :AlicesNewCity ;
+    prov:wasGeneratedBy :AdminCollectedDataFromAlicesEmail .
+
+:CollectedAlicesNewZipCode a tcu:StudentZipCode,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :CollectedPersonalData ;
+    prov:used :AdminRectifiedAlicesZipCode ;
+    prov:wasDerivedFrom :AlicesNewZipCode ;
+    prov:wasGeneratedBy :AdminCollectedDataFromAlicesEmail .
+
+:Data rdfs:subClassOf :Variable .
+
+:DataCollectionStepForRectification a owl:NamedIndividual,
+        gdprov:DataCollectionStep ;
+    pPlan:isPrecededBy :DataComparisonStepWhereCorrectionIsNeeded,
+        :DataComparisonStepWhereCorrectionIsNotNeeded ;
+    gdprov:generatesData :CollectedPersonalData ;
+    gdprov:isPartOfProcess :RectificationProcess .
+
+:DataStep rdfs:subClassOf :Step .
+
+:StoredAlicesCityName a tcu:CityName,
+        owl:NamedIndividual,
+        gdprov:PersonalDataEntity ;
+    prov:wasDerivedFrom :StoredAlicesCityId ;
+    prov:wasGeneratedBy :AdminSelectedCityNameById .
+
+gdprov:DataCollectionActivity a owl:Class .
+
+gdprov:DataCollectionStep a owl:Class .
+
+:AdminRectifiedAlicesAddress a owl:NamedIndividual,
+        gdprov:RectifyDataActivity ;
+    pPlan:correspondsToStep :DataRectificationStep ;
+    prov:endedAtTime "2020-05-30T09:12:00"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:11:00"^^xsd:dateTime ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminComparedAlicesAddresses .
+
+:AdminRectifiedAlicesNeighborhood a owl:NamedIndividual,
+        gdprov:RectifyDataActivity ;
+    pPlan:correspondsToStep :DataRectificationStep ;
+    prov:endedAtTime "2020-05-30T09:06:45"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:06:15"^^xsd:dateTime ;
+    prov:used :CollectedAlicesNewNeighborhood ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminComparedAlicesNeighborhoods .
+
+:AdminSelectedCityNameById a owl:NamedIndividual,
+        prov:Activity ;
+    prov:endedAtTime "2020-05-30T09:02:45"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:02:15"^^xsd:dateTime ;
+    prov:used :StoredAlicesCityId ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminCollectedDataFromAlicesEmail .
+
+:AlicesNewAddress a tcu:StudentAddress,
+        owl:NamedIndividual ;
+    prov:wasAttributedTo :Alice .
+
+:AlicesNewCity a tcu:CityName,
+        owl:NamedIndividual,
+        gdprov:PersonalDataEntity ;
+    prov:wasAttributedTo :Alice .
+
+:AlicesNewNeighborhood a tcu:StudentNeighborhood,
+        owl:NamedIndividual ;
+    prov:wasAttributedTo :Alice .
+
+:AlicesNewZipCode a tcu:StudentZipCode,
+        owl:NamedIndividual ;
+    prov:wasAttributedTo :Alice .
+
+:CollectedAlicesNewNeighborhood a tcu:StudentNeighborhood,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :CollectedPersonalData ;
+    prov:wasDerivedFrom :AlicesNewNeighborhood ;
+    prov:wasGeneratedBy :AdminCollectedDataFromAlicesEmail .
+
+:DataComparisonStepWhereCorrectionIsNotNeeded a owl:NamedIndividual,
+        gdprov:DataComparisonStep ;
+    gdprov:hasDataDiscrepancy true ;
+    gdprov:isPartOfProcess :RectificationProcess ;
+    gdprov:usesData :CollectedPersonalData,
+        :StoredPersonalData .
+
+:StoredAlicesAddress a tcu:StudentAddress,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :StoredPersonalData ;
+    prov:wasInvalidatedBy :AdminRectifiedAlicesAddress .
+
+:StoredAlicesCityId a tcu:StudentCityId,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :StoredPersonalData .
+
+:StoredAlicesNeighborhood a tcu:StudentNeighborhood,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :StoredPersonalData ;
+    prov:wasInvalidatedBy :AdminRectifiedAlicesNeighborhood .
+
+:StoredAlicesZipCode a tcu:StudentZipCode,
+        owl:NamedIndividual ;
+    pPlan:correspondsToVariable :StoredPersonalData ;
+    prov:wasInvalidatedBy :AdminRectifiedAlicesZipCode .
+
+prov:Activity a owl:Class .
+
+:AdminRectifiedAlicesZipCode a owl:NamedIndividual,
+        gdprov:RectifyDataActivity ;
+    pPlan:correspondsToStep :DataRectificationStep ;
+    prov:endedAtTime "2020-05-30T09:08:45"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:08:15"^^xsd:dateTime ;
+    prov:wasAssociatedWith :Sapos ;
+    prov:wasInformedBy :AdminComparedAlicesZipCodes .
+
+gdprov:PersonalData a owl:Class .
+
+gdprov:PersonalDataEntity a owl:Class .
+
+:DataComparisonStepWhereCorrectionIsNeeded a owl:NamedIndividual,
+        gdprov:DataComparisonStep ;
+    pPlan:isPrecededBy :DataRectificationStep ;
+    gdprov:hasDataDiscrepancy false ;
+    gdprov:isPartOfProcess :RectificationProcess ;
+    gdprov:usesData :CollectedPersonalData,
+        :StoredPersonalData .
+
+:DataRectificationStep a owl:NamedIndividual,
+        gdprov:RectifyData ;
+    gdprov:generatesData :RectifiedPersonalData ;
+    gdprov:invalidatesData :StoredPersonalData ;
+    gdprov:isPartOfProcess :RectificationProcess .
+
+:RectificationProcess a owl:NamedIndividual,
+        gdprov:RectificationProcess .
+
+:RectifiedPersonalData a owl:NamedIndividual,
+        gdprov:PersonalData ;
+    owl:differentFrom :StoredPersonalData .
+
+:Alice a owl:NamedIndividual,
+        gdprov:DataSubject .
+
+:CollectedPersonalData a owl:NamedIndividual,
+        gdprov:PersonalData .
+
+:AdminCollectedDataFromAlicesEmail a owl:NamedIndividual,
+        gdprov:DataCollectionActivity ;
+    pPlan:correspondsToStep :DataCollectionStepForRectification ;
+    prov:endedAtTime "2020-05-30T09:02:00"^^xsd:dateTime ;
+    prov:startedAtTime "2020-05-30T09:00:00"^^xsd:dateTime ;
+    prov:wasAssociatedWith :Admin ;
+    prov:wasInformedBy :AliceSendedEmailToSaposAdmin .
+
+:Sapos a owl:NamedIndividual,
+        prov:Agent .
+
+:StoredPersonalData a owl:NamedIndividual,
+        gdprov:PersonalData .
+
