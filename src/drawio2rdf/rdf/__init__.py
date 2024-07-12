@@ -313,7 +313,7 @@ def get_var_label(id: str, namespace: RDFLibNamespace):
     return id_var, id_label
 
 def is_literal(text: str):
-    return re.search(r".+\^{2}.*:.+", text)
+    return re.search(r".+(\^{2}.*:.+|@.+)", text) is not None
 
 from rdflib.namespace import XSD
 from datetime import datetime
@@ -330,12 +330,15 @@ def datetime_from_literal(text: str):
 
 def build_literal(text: str):
     clean_literal_text = re.sub(r"<.*?>", "", text)
-    value, type = clean_literal_text.split("^^")
-    type_prefix, type_label = type.split(":")
-    if type_prefix != "xsd":
-        raise Exception(f"Literal must be XSD but was {type_prefix}")
-    type = getattr(XSD, type_label)
-    result = Literal(XSD_MAPPER[type](value), datatype=type)
+    if "^^" in clean_literal_text:
+        value, type = clean_literal_text.split("^^")
+        type_prefix, type_label = type.split(":")
+        if type_prefix != "xsd":
+            raise Exception(f"Literal must be XSD but was {type_prefix}")
+        type = getattr(XSD, type_label)
+        result = Literal(XSD_MAPPER[type](value), datatype=type)
+    else:
+        result = Literal(clean_literal_text)
     return create_var_for_literal(result)
 
 def create_var_for_literal(literal: Literal):
