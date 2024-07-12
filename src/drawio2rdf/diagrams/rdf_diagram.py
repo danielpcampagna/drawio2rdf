@@ -746,8 +746,6 @@ class RDFDiagram(Diagram):
     @staticmethod
     def _is_property(node: Element) -> bool:
         styles = style_as_dict(node.get("style"))
-        if node.get("value") == ":isPartOfProcess":
-            import pdb; pdb.set_trace()
         return (
             RDFDiagram._is_relation(node)
             and styles.get("startArrow") == "oval"

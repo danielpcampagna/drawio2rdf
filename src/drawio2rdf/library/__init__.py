@@ -180,8 +180,8 @@ def get_label(element: Element, children: list[Element]):
     for child in children:
         result = child.get("value")
         if result: return result
-
-    raise Exception(f"Name not found for {element} with children {children}")
+    import pdb; pdb.set_trace()
+    raise Exception(f'Element with id "{element.get("id")}" has no label.')
 
 
 @dataclass
