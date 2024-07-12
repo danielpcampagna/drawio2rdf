@@ -10,7 +10,7 @@ import logging
 
 from rdflib import Graph, Literal, namespace as ns
 
-from drawio2rdf.library import Library
+from drawio2rdf.library import Library, get_children, get_label
 from drawio2rdf.diagrams.base import Diagram
 
 
@@ -202,6 +202,79 @@ class GraffooEnum(Enum):
     SWRL = "SWRL"
     PREFIXES = "Prefixes"
 
+    @staticmethod
+    def is_class(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.CLASS.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_datatype(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.DATATYPE.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_class_restriction(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.CLASS_RESTRICTION.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_instance(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.INSTANCE.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_predicate(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.PREDICATE.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_object_property(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.OBJECT_PROPERTY.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_annotation_property_facility(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.ANNOTATION_PROPERTY_FACILITY.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_annotation_property(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.ANNOTATION_PROPERTY.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_object_property_facility(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.OBJECT_PROPERTY_FACILITY.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_data_property_facility(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.DATA_PROPERTY_FACILITY.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_data_property(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.DATA_PROPERTY.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_datatype_instance(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.DATATYPE_INSTANCE.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_datatype_restriction(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.DATATYPE_RESTRICTION.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_ontology(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.ONTOLOGY.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_additional_axioms(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.ADDITIONAL_AXIOMS.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_annotations(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.ANNOTATIONS.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_swrl(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.SWRL.value}\d*", candidate) is not None
+
+    @staticmethod
+    def is_prefixes(candidate: str) -> bool:
+        return re.match(rf"^{GraffooEnum.PREFIXES.value}\d*", candidate) is not None
+
+
 class RDFConstructorFromGraffoo(ConstructorFromDrawIOLibrary):
 
     # TODO: define a structure for these components
@@ -216,7 +289,7 @@ class RDFConstructorFromGraffoo(ConstructorFromDrawIOLibrary):
         # TODO: create a function for this block
         # Add all prefixes firstly
         for component in components:
-            if component["category"].category == GraffooEnum.PREFIXES.value:
+            if GraffooEnum.is_prefixes(component["category"].category):
                 prefix_elem, url_elem = component["children"]
                 
                 # NOTE: Maybe this might be not enought for all cases
@@ -234,46 +307,45 @@ class RDFConstructorFromGraffoo(ConstructorFromDrawIOLibrary):
 
         # Add vertex
         for component in components:
-            if component["category"].category == GraffooEnum.ONTOLOGY.value:
+            if GraffooEnum.is_ontology(component["category"].category):
                 # TODO: Refactor this block
-                ontol_components = self.get_ontology_components_from_ontology_component(component)
+                onto_components = self.get_ontology_components_from_ontology_component(component)
                 onto_namespace = get_component_namespace_from_onto(component, namespaces)
                 
-                for onto_component in ontol_components:
-                    if onto_component["category"].category == GraffooEnum.INSTANCE.value:
+                for onto_component in onto_components:
+                    if GraffooEnum.is_instance(onto_component["category"].category):
                         RDFLibInstance(onto_component).create(self.g, onto_namespace)
-                    elif onto_component["category"].category == GraffooEnum.CLASS.value:
+                    elif GraffooEnum.is_class(onto_component["category"].category):
                         RDFLibClass(onto_component).create(self.g, onto_namespace)
 
         for component in components:
             # TODO: Improve this checking
-            if component["category"].category == GraffooEnum.ONTOLOGY.value:
-                ontol_components = self.get_ontology_components_from_ontology_component(component)
+            if GraffooEnum.is_ontology(component["category"].category):
+                onto_components = self.get_ontology_components_from_ontology_component(component)
                 onto_namespace = get_component_namespace_from_onto(component, namespaces)
-                for onto_component in ontol_components:
-                    if onto_component["category"].category == GraffooEnum.PREDICATE.value:
-                        # import pdb; pdb.set_trace()
+                for onto_component in onto_components:
+                    if GraffooEnum.is_predicate(onto_component["category"].category):
                         source_element = [e for e in elements if e.get("id") == onto_component["element"].get("source")][0]
                         target_element = [e for e in elements if e.get("id") == onto_component["element"].get("target")][0]
                         source_component = self.library.generate_components_from_elements([source_element])[0]
                         target_component = self.library.generate_components_from_elements([target_element])[0]
-                        source_namespace = get_component_namespace_from_element_id(source_component, namespaces, ontol_components)
-                        target_namespace = get_component_namespace_from_element_id(target_component, namespaces, ontol_components)
-                        predicate_namespace = get_component_namespace_from_element_id(onto_component, namespaces, ontol_components)
+                        source_namespace = get_component_namespace_from_element(source_element, namespaces, components, get_children(source_element.get("id"), elements))
+                        target_namespace = get_component_namespace_from_element(target_element, namespaces, components, get_children(target_element.get("id"), elements))
+                        predicate_namespace = get_component_namespace_from_element(onto_component["element"], namespaces, components, get_children(onto_component["element"].get("id"), elements))
                         RDFLibPredicate(source_component, onto_component, target_component, source_namespace, predicate_namespace, target_namespace).create(self.g)
-            if component["category"].category == GraffooEnum.PREDICATE.value:
+            if GraffooEnum.is_predicate(component["category"].category):
                 source_element = [e for e in elements if e.get("id") == component["element"].get("source")][0]
                 target_element = [e for e in elements if e.get("id") == component["element"].get("target")][0]
                 source_component = self.library.generate_components_from_elements([source_element])[0]
                 target_component = self.library.generate_components_from_elements([target_element])[0]
-                source_namespace = get_component_namespace_from_element_id(source_component, namespaces, components)
-                target_namespace = get_component_namespace_from_element_id(target_component, namespaces, components)
-                predicate_namespace = get_component_namespace_from_element_id(component, namespaces, components)
+                source_namespace = get_component_namespace_from_element(source_element, namespaces, components, get_children(source_element.get("id"), elements))
+                target_namespace = get_component_namespace_from_element(target_element, namespaces, components, get_children(target_element.get("id"), elements))
+                predicate_namespace = get_component_namespace_from_element(component["element"], namespaces, components, get_children(component["element"].get("id"), elements))
                 RDFLibPredicate(source_component, component, target_component, source_namespace, predicate_namespace, target_namespace).create(self.g)
 
     def get_ontology_components_from_ontology_component(self, component: dict):
         elements = component["children"]
-        ontology_components = self.library.generate_components_from_elements(elements)
+        ontology_components = self.library.generate_components_from_elements(elements)  
         return ontology_components
 
     def serialize(self, output: str | Path, format: ValidFormat = "turtle"):
@@ -288,9 +360,13 @@ def get_component_namespace_from_onto(component: dict, namespaces: list):
     namespace: RDFLibNamespace = [n for n in namespaces if re.search(n.url, onto_url)][0]
     return namespace
 
-def get_component_namespace_from_element_id(element_id: str, namespaces: list, components: list):
+def get_component_namespace_from_element(element: Element, namespaces: list, components: list, children: list[Element]):
+    if has_prefix(element, children):
+        return get_namespace_from_prefix(element, namespaces, children)
+    
+    element_id = element.get("id")
     for component in components:
-        if component["category"].category == GraffooEnum.ONTOLOGY.value:
+        if GraffooEnum.is_ontology(component["category"].category):
             for child in component["children"]:
                 if child.get("id") == element_id:
                     return get_component_namespace_from_onto(component, namespaces)
@@ -348,3 +424,15 @@ def create_var_for_literal(literal: Literal):
 
 def generate_var_name_for(text: str):
     return f'LITERAL_{str(uuid.uuid3(uuid.NAMESPACE_DNS, text)).replace("-", "_")}'
+
+def has_prefix(element: Element, children: list[Element]):
+    element_label: str = get_label(element, children)
+    return re.match(r"(\w+:\w+)", re.sub("<.*?>|\n", "", element_label)) is not None
+
+def get_namespace_from_prefix(element: Element, namespaces: list[RDFLibNamespace], children: list[Element]):
+    element_label: str = get_label(element, children)
+    element_prefix: str = re.findall(r"^(\w+):\w+", re.sub("<.*?>|\n", "", element_label))[0]
+    for ns in namespaces:
+        if ns.prefix.upper() == element_prefix.upper():
+            return ns
+    raise Exception(f'There is not Namespace declared for the prefix "{element_prefix}"')
