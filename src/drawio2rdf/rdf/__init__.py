@@ -301,10 +301,7 @@ def get_component_namespace_from_element_id(element_id: str, namespaces: list, c
 
 # TODO: This method should belong a instance that create it
 def get_var_label(id: str, namespace: RDFLibNamespace):
-    try:
-        namespace_prefix = use_namespace(namespace.prefix if namespace is not None else "")
-    except:
-        import pdb; pdb.set_trace()
+    namespace_prefix = use_namespace(namespace.prefix if namespace is not None else "")
 
     if re.match(r"^:\w+", id):
         id = f"{namespace_prefix}{id}"
