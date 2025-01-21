@@ -9,7 +9,7 @@ from pathlib import Path
 import logging
 
 from rdflib import Graph, Literal, namespace as ns
-
+from rdflib.plugins.serializers.longturtle import LongTurtleSerializer
 from drawio2rdf.library import Library, get_children, get_label
 from drawio2rdf.diagrams.base import Diagram
 
@@ -115,14 +115,13 @@ class RDFLibClass:
         id_var, id_label = get_var_label(id, namespace)
 
         # from rdflib.namespace import RDF
-        if is_builtin_namespace(id_var):
-            exec(f"g.add(({id_var}.{id_label}, ns.RDF.type, ns.OWL.Class))")
-        else:
-            exec(f"global {id_var}; g.add(({id_var}.{id_label}, ns.RDF.type, ns.OWL.Class))")
+        if not is_builtin_namespace(id_var):
+            id_var = use_namespace(id_var)
+        exec(f"g.add(({id_var}.{id_label}, ns.RDF.type, ns.OWL.Class))")
 
         for superclasse in superclasses:
             sc_prefix, sc_id = superclasse.split(":")
-            sc_prefix_var = use_namespace(to_camel_case(as_var(sc_prefix)).upper())
+            sc_prefix_var = use_namespace(to_camel_case(as_var(sc_prefix)))
             global_vars = ", ".join([id_var])
             exec(f"global {global_vars}; g.add(({id_var}.{id_label}, ns.RDF.type, {sc_prefix_var}.{sc_id}))")
 
@@ -204,82 +203,85 @@ class GraffooEnum(Enum):
 
     @staticmethod
     def is_class(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.CLASS.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.CLASS.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_datatype(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.DATATYPE.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.DATATYPE.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_class_restriction(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.CLASS_RESTRICTION.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.CLASS_RESTRICTION.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_instance(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.INSTANCE.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.INSTANCE.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_predicate(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.PREDICATE.value}\d*", candidate) is not None
+        # TODO: generalize
+        return re.match(rf"^{GraffooEnum.PREDICATE.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_object_property(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.OBJECT_PROPERTY.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.OBJECT_PROPERTY.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_annotation_property_facility(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.ANNOTATION_PROPERTY_FACILITY.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.ANNOTATION_PROPERTY_FACILITY.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_annotation_property(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.ANNOTATION_PROPERTY.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.ANNOTATION_PROPERTY.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_object_property_facility(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.OBJECT_PROPERTY_FACILITY.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.OBJECT_PROPERTY_FACILITY.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_data_property_facility(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.DATA_PROPERTY_FACILITY.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.DATA_PROPERTY_FACILITY.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_data_property(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.DATA_PROPERTY.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.DATA_PROPERTY.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_datatype_instance(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.DATATYPE_INSTANCE.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.DATATYPE_INSTANCE.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_datatype_restriction(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.DATATYPE_RESTRICTION.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.DATATYPE_RESTRICTION.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_ontology(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.ONTOLOGY.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.ONTOLOGY.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_additional_axioms(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.ADDITIONAL_AXIOMS.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.ADDITIONAL_AXIOMS.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_annotations(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.ANNOTATIONS.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.ANNOTATIONS.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_swrl(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.SWRL.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.SWRL.value}\d*", candidate, re.IGNORECASE) is not None
 
     @staticmethod
     def is_prefixes(candidate: str) -> bool:
-        return re.match(rf"^{GraffooEnum.PREFIXES.value}\d*", candidate) is not None
+        return re.match(rf"^{GraffooEnum.PREFIXES.value}\d*", candidate, re.IGNORECASE) is not None
 
 
 class RDFConstructorFromGraffoo(ConstructorFromDrawIOLibrary):
 
     # TODO: define a structure for these components
     def _construct_components(self, elements: list[Element]):
+        # [print(f"> {str(e.get('id')).ljust(30)}{e.get('value')}") for e in elements]
         components = self.library.generate_components_from_elements(elements)
+        # [print(f"> {str(c['element'].get('id')).ljust(30)}{c['element'].get('value')}") for c in components]
         logger.info(f"Found components in this library: {', '.join(set(c['category'].category for c in components))}")
 
         # Create namespaces and bind them
@@ -305,21 +307,53 @@ class RDFConstructorFromGraffoo(ConstructorFromDrawIOLibrary):
         for p, u in get_builtin_namespaces():
             namespaces.append(RDFLibNamespace(p, str(u)))
 
-        # Add vertex
+        # Add vertexes
         for component in components:
+            # element = component["element"]
+            # if element.get("id") == "6RsTKesfsP7yNlltbBIK-3":
+            #     import pdb; pdb.set_trace()
+            # if ("http://example.org/SAPOS#" in component["label"]):
+            # print(f'> {component["label"]}')
+            # if ("SAPOS" in component["label"]):
+            # # if (component["element"].get("id") == "yuuyG5O35ae_3AQGfYBI-0"):
+            #     import pdb; pdb.set_trace()
+            # print(f"> {str(component['element'].get('id')).ljust(30)}{component['element'].get('value')}")
+            # print(f'> {component["element"].get("value")}')
             if GraffooEnum.is_ontology(component["category"].category):
                 # TODO: Refactor this block
                 onto_components = self.get_ontology_components_from_ontology_component(component)
                 onto_namespace = get_component_namespace_from_onto(component, namespaces)
                 
                 for onto_component in onto_components:
+                    # if component["element"].get("id") == "F2XOCTqZWau5vLps_zfc-2":
+                    #     print(f"> {str(onto_component['element'].get('id')).ljust(30)}{onto_component['element'].get('value')}")
+                    # if onto_component["element"].get("id") == "6RsTKesfsP7yNlltbBIK-3":
+                    #     import pdb; pdb.set_trace()
+                    # get_children(component["element"].get("id"), elements)
                     if GraffooEnum.is_instance(onto_component["category"].category):
                         RDFLibInstance(onto_component).create(self.g, onto_namespace)
                     elif GraffooEnum.is_class(onto_component["category"].category):
                         RDFLibClass(onto_component).create(self.g, onto_namespace)
 
+        # # for element in elements:
+        # for component in components:
+        #     element = component["element"]
+        #     print(f">\t{element.get('id')}\t{element.get('value')}")
+        #     # if element.get("id") == "6RsTKesfsP7yNlltbBIK-3":
+        #     if element.get("id") == "yuuyG5O35ae_3AQGfYBI-0":
+        #         import pdb; pdb.set_trace()
+        
+        # yuuyG5O35ae_3AQGfYBI-0
+        # yuuyG5O35ae_3AQGfYBI-0
+        
+        # Add edges
         for component in components:
             # TODO: Improve this checking
+            # if gdprov:generatesData
+            # if component["element"].get("id") == "a4XwfEoXTRVEaWAdiMhQ-7":
+            #     import pdb; pdb.set_trace()
+            # if "gdprov:generatesData" in component["element"].get("value"):
+            #     import pdb; pdb.set_trace()
             if GraffooEnum.is_ontology(component["category"].category):
                 onto_components = self.get_ontology_components_from_ontology_component(component)
                 onto_namespace = get_component_namespace_from_onto(component, namespaces)
@@ -351,6 +385,10 @@ class RDFConstructorFromGraffoo(ConstructorFromDrawIOLibrary):
     def serialize(self, output: str | Path, format: ValidFormat = "turtle"):
         format = cast(ValidFormat, format)
         self.g.serialize(output, format=format)
+        # self.g.serialize(output, format='longturtle')
+        # with open(output, "wb") as f:
+        #     LongTurtleSerializer(self.g).serialize(stream=f, short_name="longturtle")
+        
 
 def extract_pattern(pattern: str, text: str):
     return [prefix[:-1] for prefix in re.findall(pattern, re.sub("<.*?>", "", text))]

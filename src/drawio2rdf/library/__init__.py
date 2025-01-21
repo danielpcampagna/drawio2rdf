@@ -1,4 +1,3 @@
-import re
 import json
 import base64
 import zlib
@@ -7,9 +6,12 @@ import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 from dataclasses import dataclass, field
 from typing import Literal
+from collections import defaultdict
 
 from drawio2rdf.diagrams.helpers import style_as_dict
+from drawio2rdf.diagrams.base import Diagram
 from drawio2rdf.library.model.drawio import MxGraphModel, MxCell
+from drawio2rdf.library.model.xml_model import XmlObject
 
 
 def decompress(compressed_str: str) -> MxGraphModel:
@@ -106,6 +108,21 @@ class LibraryComponent:
             )
         )
         result = sum([children_distance, attrs_distance , style_distance]) / 3
+        if (
+            element.get("id") in ["gcbnus1XtaW9514hbYn6-7", "gcbnus1XtaW9514hbYn6-6"]
+            and self.category in ["predicate", "predicate1"]
+        ):
+        # if element.get("id") == "gcbnus1XtaW9514hbYn6-6":
+            print(dict(
+                id=element.get("id"),
+                category=self.category,
+                distance=dict(
+                    children_distance=children_distance,
+                    attrs_distance=attrs_distance,
+                    style_distance=style_distance,
+                )
+            ))
+            import pdb; pdb.set_trace()
         return result
 
     def __repr__(self):
@@ -136,11 +153,6 @@ class LibraryComponent:
             raise Exception("Invalid input because of multiple roots")
 
         return components[root_ids[0]]
-
-
-from xml.etree.ElementTree import Element
-from library.model.xml_model import XmlObject
-from diagrams.base import Diagram
 
 
 class _ElementConsumer:
@@ -174,13 +186,13 @@ class _ElementConsumer:
         children = get_children(element_id, self.elements)
         return element, children
 
+# TODO: It seems this methods to belongs to Element instances
 def get_label(element: Element, children: list[Element]):
     result = element.get("value")
     if result: return result
     for child in children:
         result = child.get("value")
         if result: return result
-    import pdb; pdb.set_trace()
     raise Exception(f'Element with id "{element.get("id")}" has no label.')
 
 
@@ -189,17 +201,15 @@ class Library:
     library_components: dict[str, LibraryComponent] = field(repr=False)
 
     def create(self, element: Element, children: list[Element] = list()):
-        library_component = self.get_closed_library_component(element, children)
+        library_component = self.get_closest_library_component(element, children)
         label = get_label(element, children)
         return library_component.create(element, label)
 
-    def get_closed_library_component(self, element: Element, children=None):
+    def get_closest_library_component(self, element: Element, children=None):
         distances: dict[str, float] = dict()
         for category in self.library_components:
             library_component = self.library_components[category]
-            distances[category] = library_component.calculate_distance(
-                element, children
-            )
+            distances[category] = library_component.calculate_distance(element, children)
         result = self.library_components[min(distances, key=distances.get)]
         return result
 
@@ -222,7 +232,7 @@ class Library:
     def generate_component_from_element(
         self, element: Element, children: list[Element]
     ) -> LibraryComponent:
-        library_component = self.get_closed_library_component(element, children)
+        library_component = self.get_closest_library_component(element, children)
         label = get_label(element, children)
         return library_component.create(element, label)
 
@@ -256,6 +266,11 @@ class Library:
         for component in raw_components:
             title = component.get("title")
             lib_comp = LibraryComponent._from_decompressed_component(component)
+            if title in components:
+                import re
+                pure_title = re.sub("\d*", "", title)
+                index: int = int(re.sub(pure_title, "", title) or "0")
+                title = f"{title}{index+1}"
             components[title] = lib_comp
         return Library(library_components=components)
 
@@ -369,17 +384,45 @@ def get_children(
 
 def aggrupate_elements_by_parenthood(elements: list[Element]) -> list[list[Element]]:
     result: list[list[Element]] = list()
-    was_added = lambda e: any(e in subdiagram for subdiagram in result)
-    diagram_index = 0
-    for elem in elements:
-        if not was_added(elem):
-            result.append([elem])
-            parent_id = elem.get("id")
-            for child in get_children(parent_id, elements):
-                if not was_added(child):
-                    result[diagram_index].append(child)
-            diagram_index += 1
+    id_to_element = {el.get('id'): el for el in elements}
+    parent_to_children = defaultdict(list)
+    
+    # Populate the parent to children mapping
+    for el in elements:
+        parent_id = el.get('parent')
+        if parent_id in id_to_element:
+            parent_to_children[parent_id].append(el)
+    
+    result = []
+    for el in elements:
+        row = [el]
+        children = parent_to_children.get(el.get('id'), [])
+        row.extend(children)
+        for child in children:
+            grandchildren = parent_to_children.get(child.get('id'), [])
+            row.extend(grandchildren)
+        result.append(row)
+    
     return result
+    # was_added = lambda e: any(e in subdiagram for subdiagram in result)
+    # diagram_index = 0
+    # for elem in elements:
+    #     if elem.get("id") == "1OY2NaF1pyoJtwt6NJYn-313":
+    #         import pdb; pdb.set_trace()
+    #     if not was_added(elem):
+    #         result.append([elem])
+    #         parent_id = elem.get("id")
+    #         if parent_id == "1OY2NaF1pyoJtwt6NJYn-312":
+    #             # print([[e.items() for e in v] for v in result if child in v])
+    #             import pdb; pdb.set_trace()
+    #         for child in get_children(parent_id, elements):
+    #             if child.get("id") == "1OY2NaF1pyoJtwt6NJYn-313":
+    #                 print([[e.items() for e in subdiagram] for subdiagram in result if child in subdiagram])
+    #                 import pdb; pdb.set_trace()
+    #             if not was_added(child):
+    #                 result[diagram_index].append(child)
+    #         diagram_index += 1
+    # return result
 
 
 if __name__ == "__main__":

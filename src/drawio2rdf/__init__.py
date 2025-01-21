@@ -3,6 +3,7 @@ import logging
 import click
 
 from drawio2rdf.rdf import RDFConstructorFromGraffoo
+from rdflib.plugins.serializers.longturtle import LongTurtleSerializer
 from drawio2rdf.helpers import use_params
 
 

@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from typing import List, cast
 from xml.etree.ElementTree import Element
 
-from N2G import drawio_diagram
+# from N2G import drawio_diagram
 
+from .tmp_n2g import drawio_diagram # NOTE: Until the approvation of this [PR](https://github.com/dmulyalin/N2G/pull/32), this is necessary for correct results
 from .typings import TYPE_VALID_NODE_POSITIONS
 
 
