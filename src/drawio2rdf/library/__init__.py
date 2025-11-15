@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 from collections import defaultdict
 
+from drawio2rdf.helpers import clear_xml
 from drawio2rdf.diagrams.helpers import style_as_dict
 from drawio2rdf.diagrams.base import Diagram
 from drawio2rdf.library.model.drawio import MxGraphModel, MxCell
@@ -233,7 +234,7 @@ class Library:
         self, element: Element, children: list[Element]
     ) -> LibraryComponent:
         library_component = self.get_closest_library_component(element, children)
-        label = get_label(element, children)
+        label = clear_xml(get_label(element, children))
         return library_component.create(element, label)
 
     def __getattr__(self, name: str):

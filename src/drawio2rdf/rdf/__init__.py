@@ -12,6 +12,7 @@ from rdflib import Graph, Literal, namespace as ns
 from rdflib.plugins.serializers.longturtle import LongTurtleSerializer
 from drawio2rdf.library import Library, get_children, get_label
 from drawio2rdf.diagrams.base import Diagram
+from drawio2rdf.helpers import clear_xml
 
 
 ValidFormat = TLiteral["json-ld", "hext", "n3", "nquads", "nt", "trix", "turtle", "xml"]
@@ -62,10 +63,21 @@ class RDFLibPredicate:
                 item = f"{id_var}.{id_label}"
             triple.append(item)
                 
-        triple = ", ".join(triple)
-        triple = f"({triple})"
+        triple = clean_triple(triple)
+        serialized_triple = ", ".join(triple)
+        serialized_triple = f"({serialized_triple})"
         variables = ", ".join(variables)
-        exec(f"g.add({triple})")
+        exec(f"g.add({serialized_triple})")
+
+
+def clean_triple(triple: list[str]) -> list[str]:
+    """
+    Apply some rules to the triple to make it valid for RDFLib
+    """
+    for i in range(len(triple)):
+        triple[i] = clear_xml(triple[i])
+    return triple
+
 
 @dataclass
 class RDFLibNamespace:
@@ -144,7 +156,9 @@ class RDFLibInstance:
         id_var, id_label = get_var_label(id, namespace)
         global_ns = ", ".join(declare_global_namespaces())
 
-        exec(f"global {id_var}; g.add(({id_var}.{id_label}, ns.RDF.type, ns.OWL.NamedIndividual))")
+        prefix = f"global {id_var}; " if not id_var.startswith("ns.") else ""            
+        exec(f"{prefix}g.add(({id_var}.{id_label}, ns.RDF.type, ns.OWL.NamedIndividual))")
+        # exec(f"g.add(({id_var}.{id_label}, ns.RDF.type, ns.OWL.NamedIndividual))")
         for superclasse in superclasses:
             sc_prefix, sc_id = superclasse.split(":")
             sc_prefix_var = use_namespace(to_camel_case(as_var(sc_prefix)))
@@ -375,6 +389,7 @@ class RDFConstructorFromGraffoo(ConstructorFromDrawIOLibrary):
                 source_namespace = get_component_namespace_from_element(source_element, namespaces, components, get_children(source_element.get("id"), elements))
                 target_namespace = get_component_namespace_from_element(target_element, namespaces, components, get_children(target_element.get("id"), elements))
                 predicate_namespace = get_component_namespace_from_element(component["element"], namespaces, components, get_children(component["element"].get("id"), elements))
+
                 RDFLibPredicate(source_component, component, target_component, source_namespace, predicate_namespace, target_namespace).create(self.g)
 
     def get_ontology_components_from_ontology_component(self, component: dict):
